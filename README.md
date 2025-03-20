@@ -1,1 +1,1 @@
-A generic MCP server for loading arbitrary supporting markdown files as `resources` or `tools` for a particular NPM package. This server can support informed code generation.
+This provides a structured way to serve and access markdown documentation for NPM packages. It enables informed code generation by exposing relevant markdown files as `resources` or `tools` in an MCP server.
