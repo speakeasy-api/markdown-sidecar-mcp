@@ -4,40 +4,41 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ConsoleLogger } from "../console-logger.js";
 import { findMarkdownFiles, toToolNameFormat } from "./util.js";
 
+const pythonCommands = ["python3", "python"];
+
 function getPythonHelp(packageName: string): string {
-  const result = spawnSync(
-    "python3",
-    ["-c", `import ${packageName}; help(${packageName})`],
-    {
-      encoding: "utf-8",
+
+  for (const cmd of pythonCommands) {
+    const { success, result } = tryPythonCommand(cmd, [
+      "-c",
+      `import ${packageName}; help(${packageName})`
+    ]);
+    
+    if (success) {
+      return result.stdout;
     }
-  );
-  
-  if (result.error) {
-    throw new Error(`Failed to get help for package ${packageName}: ${result.error.message}`);
   }
   
-  return result.stdout;
+  throw new Error(`Failed to get help for package ${packageName}: Neither python nor python3 commands worked`);
 }
 
-function getPythonPackagePath(packageName: string): string {
-  const result = spawnSync(
-    "python3",
-    ["-c", `
+function getPythonPackagePath(packageName: string): string {  
+  for (const cmd of pythonCommands) {
+    const { success, result } = tryPythonCommand(cmd, [
+      "-c",
+      `
 import ${packageName}
 import os.path
 print(os.path.dirname(${packageName}.__file__))
-`],
-    {
-      encoding: "utf-8",
+`
+    ]);
+    
+    if (success) {
+      return result.stdout.trim();
     }
-  );
-
-  if (result.error) {
-    throw new Error(`Failed to get package path for ${packageName}: ${result.error.message}`);
   }
-
-  return result.stdout.trim();
+  
+  throw new Error(`Failed to get package path for ${packageName}: Neither python nor python3 commands worked`);
 }
 
 export async function mountPyPiDocs(
@@ -124,3 +125,16 @@ export async function mountPyPiDocs(
     logger.debug(`Mounted ${relativePath} from Python package`);
   }
 }
+
+function tryPythonCommand(command: string, args: string[]): { success: boolean; result: any } {
+  try {
+    const result = spawnSync(command, args, { encoding: "utf-8" });
+    if (!result.error && result.status === 0) {
+      return { success: true, result };
+    }
+    return { success: false, result };
+  } catch {
+    return { success: false, result: null };
+  }
+}
+
