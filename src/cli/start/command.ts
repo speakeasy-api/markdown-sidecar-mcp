@@ -19,7 +19,7 @@ export const startCommand = buildCommand({
         default: "stdio",
         values: ["stdio", "sse"],
       },
-      package: {
+      packageName: {
         kind: "parsed",
         brief: "The package to mount markdown docs for",
         parse: (val: string) => z.string().nonempty().parse(val),

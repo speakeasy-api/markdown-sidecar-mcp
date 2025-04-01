@@ -6,7 +6,7 @@ This is designed to be executed from within a project directory where the reques
 
 ## Arguments
 
-- `package_name`: The name of the package or module to request
+- `packageName`: The name of the package or module to request
 - `registry`: Registry the package will be found in (`npm`, `gomodules`, or `pypi`)
 - `subDir`: [OPTIONAL] The specific subdirectory to look for markdown docs in. Defaults to root.
 - `mcpPrimitive`: [OPTIONAL] The MCP primitive to expose from the server (`tool` or `resource`). This defaults to `tool`, some clients do not currently support resources.
@@ -24,7 +24,7 @@ Add the following server definition to your `.cursor/mcp.json` file:
         "-y", "--package", "mcp-markdown-sidecar",
         "--",
         "mcp", "start",
-        "--package_name", "{PACKAGE_NAME}",
+        "--packageName", "{PACKAGE_NAME}",
         "--registry", "npm"
       ]
     }
