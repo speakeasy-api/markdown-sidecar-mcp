@@ -10,6 +10,7 @@ import { mountPyPiDocs } from "./utils/pypi.js";
 
 export async function createMCPServer(deps: {
   package: string;
+  workingDir: string;
   registry: string;
   logger: ConsoleLogger;
   subDir?: string | undefined;
@@ -22,13 +23,13 @@ export async function createMCPServer(deps: {
 
   switch (deps.registry) {
     case "npm":
-      await mountNpmDocs(server, deps.package, deps.logger, deps.mcpPrimitive, deps.subDir);
+      await mountNpmDocs(server, deps.package, deps.workingDir,deps.logger, deps.mcpPrimitive, deps.subDir);
       break;
     case "gomodules":
-      await mountGoDocs(server, deps.package, deps.logger, deps.mcpPrimitive, deps.subDir);
+      await mountGoDocs(server, deps.package, deps.workingDir, deps.logger, deps.mcpPrimitive, deps.subDir);
       break;
     case "pypi":
-      await mountPyPiDocs(server, deps.package, deps.logger, deps.mcpPrimitive);
+      await mountPyPiDocs(server, deps.package, deps.workingDir,deps.logger, deps.mcpPrimitive);
       break;
     default:
       throw new Error(`Unsupported registry: ${deps.registry}`);

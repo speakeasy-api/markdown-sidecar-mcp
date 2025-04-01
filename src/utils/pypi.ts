@@ -6,13 +6,27 @@ import { findMarkdownFiles, toToolNameFormat } from "./util.js";
 
 const pythonCommands = ["python3", "python"];
 
-function getPythonHelp(packageName: string): string {
+function tryPythonCommand(command: string, args: string[], workingDirectory: string): { success: boolean; result: any } {
+  try {
+    const result = spawnSync(command, args, { 
+      encoding: "utf-8",
+      cwd: workingDirectory 
+    });
+    if (!result.error && result.status === 0) {
+      return { success: true, result };
+    }
+    return { success: false, result };
+  } catch {
+    return { success: false, result: null };
+  }
+}
 
+function getPythonHelp(packageName: string, workingDirectory: string): string {
   for (const cmd of pythonCommands) {
     const { success, result } = tryPythonCommand(cmd, [
       "-c",
       `import ${packageName}; help(${packageName})`
-    ]);
+    ], workingDirectory);
     
     if (success) {
       return result.stdout;
@@ -22,7 +36,7 @@ function getPythonHelp(packageName: string): string {
   throw new Error(`Failed to get help for package ${packageName}: Neither python nor python3 commands worked`);
 }
 
-function getPythonPackagePath(packageName: string): string {  
+function getPythonPackagePath(packageName: string, workingDirectory: string): string {  
   for (const cmd of pythonCommands) {
     const { success, result } = tryPythonCommand(cmd, [
       "-c",
@@ -31,7 +45,7 @@ import ${packageName}
 import os.path
 print(os.path.dirname(${packageName}.__file__))
 `
-    ]);
+    ], workingDirectory);
     
     if (success) {
       return result.stdout.trim();
@@ -44,10 +58,11 @@ print(os.path.dirname(${packageName}.__file__))
 export async function mountPyPiDocs(
   server: McpServer,
   packageName: string,
+  workingDirectory: string,
   logger: ConsoleLogger,
   mcpPrimitive: "tool" | "resource",
 ) {
-  const helpText = getPythonHelp(packageName);
+  const helpText = getPythonHelp(packageName, workingDirectory);
   
   // Mount Python help documentation
   if (mcpPrimitive === "tool") {
@@ -82,7 +97,7 @@ export async function mountPyPiDocs(
   logger.debug(`Mounted Python help documentation for ${packageName}`);
 
   // Find and mount markdown files if available
-  const pkgPath = getPythonPackagePath(packageName);
+  const pkgPath = getPythonPackagePath(packageName, workingDirectory);
   const markdownFiles = await findMarkdownFiles(pkgPath, []);
 
   if (markdownFiles.length === 0) {
@@ -123,18 +138,6 @@ export async function mountPyPiDocs(
     }
 
     logger.debug(`Mounted ${relativePath} from Python package`);
-  }
-}
-
-function tryPythonCommand(command: string, args: string[]): { success: boolean; result: any } {
-  try {
-    const result = spawnSync(command, args, { encoding: "utf-8" });
-    if (!result.error && result.status === 0) {
-      return { success: true, result };
-    }
-    return { success: false, result };
-  } catch {
-    return { success: false, result: null };
   }
 }
 

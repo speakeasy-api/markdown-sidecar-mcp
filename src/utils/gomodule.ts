@@ -5,12 +5,12 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ConsoleLogger } from "../console-logger.js";
 import { findMarkdownFiles, toToolNameFormat } from "./util.js";
 
-function resolveGoModulePath(moduleName: string): string {
+function resolveGoModulePath(moduleName: string, workingDir: string): string {
   const result = spawnSync(
     "go",
     ["list", "-m", "-f", "{{.Dir}}", moduleName],
     {
-      cwd: "/Users/ryanalbert/speakeasy-registry",
+      cwd: workingDir,
     }
   );
   
@@ -20,11 +20,12 @@ function resolveGoModulePath(moduleName: string): string {
 export async function mountGoDocs(
   server: McpServer,
   moduleName: string,
+  workingDir: string,
   logger: ConsoleLogger,
   mcpPrimitive: "tool" | "resource",
   subDir?: string,
 ) {
-  const modulePath = resolveGoModulePath(moduleName);
+  const modulePath = resolveGoModulePath(moduleName, workingDir);
   const docsDir = subDir ? path.join(modulePath, subDir) : modulePath;
 
   try {

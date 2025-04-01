@@ -18,6 +18,7 @@ interface StartCommandFlags {
   readonly "log-level": ConsoleLoggerLevel;
   readonly env?: [string, string][];
   readonly packageName: string;
+  readonly workingDir: string;
   readonly registry: "npm" | "gomodules" | "pypi";
   readonly subDir?: string | undefined;
   readonly mcpPrimitive: "tool" | "resource";
@@ -45,6 +46,7 @@ async function startStdio(flags: StartCommandFlags) {
   const transport = new StdioServerTransport();
   const server = await createMCPServer({
     package: flags.packageName,
+    workingDir: flags.workingDir,
     registry: flags.registry,
     logger,
     subDir: flags.subDir,
@@ -65,6 +67,7 @@ async function startSSE(flags: StartCommandFlags) {
   const app = express();
   const mcpServer = await createMCPServer({
     package: flags.packageName,
+    workingDir: flags.workingDir,
     registry: flags.registry,
     logger,
     subDir: flags.subDir,
