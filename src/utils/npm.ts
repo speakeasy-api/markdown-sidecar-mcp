@@ -2,21 +2,15 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ConsoleLogger } from "../console-logger.js";
 
 import path from 'path';
-import fs from 'fs/promises';
+import { existsSync } from 'fs';
 import { findMarkdownFiles, toToolNameFormat } from "./util.js";
-import { createRequire } from 'module';
 
 async function findPackageFromDir(startDir: string, packageName: string): Promise<string> {
-  console.error("Looking for package from directory:", startDir);
-  const require = createRequire(path.join(startDir, 'package.json'));
-  
-  try {
-    const pkgPath = path.dirname(require.resolve(packageName));
-    console.error("Found package at:", pkgPath);
-    return pkgPath;
-  } catch (e) {
-    throw new Error(`Could not find package ${packageName} from ${startDir}`);
+  const packagePath = path.join(startDir, "node_modules", packageName);
+  if (existsSync(packagePath)) {
+    return packagePath;
   }
+  throw new Error(`Could not find package ${packageName} in ${startDir}/node_modules`);
 }
 
 export async function mountNpmDocs(
@@ -80,20 +74,4 @@ export async function mountNpmDocs(
     logger.debug(`Mounted ${relativePath} as markdown resource`);
   }
 }
-
-async function findNPMModuleRoot(startPath: string): Promise<string> {
-  let dir = startPath;
-  if (dir.includes("dist") || dir.includes("build") || dir.includes("bin")) {
-    while (dir !== "/") {
-        const subDir = path.dirname(dir);
-        if (path.basename(subDir) === "node_modules") {
-          return dir;
-        }
-    
-        dir = subDir;
-      }
-  }
-  return dir;
-}
-  
 
