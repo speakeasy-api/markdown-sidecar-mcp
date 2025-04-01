@@ -2,15 +2,17 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ConsoleLogger } from "../console-logger.js";
 
 import path from 'path';
-import { existsSync } from 'fs';
+import fs from 'fs/promises';
 import { findMarkdownFiles, toToolNameFormat } from "./util.js";
 
 async function findPackageFromDir(startDir: string, packageName: string): Promise<string> {
   const packagePath = path.join(startDir, "node_modules", packageName);
-  if (existsSync(packagePath)) {
+  try {
+    await fs.access(packagePath);
     return packagePath;
+  } catch {
+    throw new Error(`Could not find package ${packageName} in ${startDir}/node_modules`);
   }
-  throw new Error(`Could not find package ${packageName} in ${startDir}/node_modules`);
 }
 
 export async function mountNpmDocs(
@@ -74,4 +76,3 @@ export async function mountNpmDocs(
     logger.debug(`Mounted ${relativePath} as markdown resource`);
   }
 }
-
