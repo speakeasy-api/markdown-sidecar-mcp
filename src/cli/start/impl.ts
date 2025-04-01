@@ -18,9 +18,9 @@ interface StartCommandFlags {
   readonly "log-level": ConsoleLoggerLevel;
   readonly env?: [string, string][];
   readonly package: string;
-  readonly registry: "npm";
+  readonly registry: "npm" | "gomodules";
   readonly subDir?: string | undefined;
-  readonly mcpPrimitive: "tool" | "resource";
+  readonly mcpPrimitive: "tool" | "resource" | "gomodules";
 }
 
 export async function main(this: LocalContext, flags: StartCommandFlags) {

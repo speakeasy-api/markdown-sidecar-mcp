@@ -28,7 +28,7 @@ export const startCommand = buildCommand({
         kind: "enum",
         brief: "The registry the package belongs to",
         default: "npm",
-        values: ["npm"],
+        values: ["npm", "gomodules"],
       },
       subDir: {
         kind: "parsed",
@@ -41,7 +41,7 @@ export const startCommand = buildCommand({
       mcpPrimitive: {
         kind: "enum",
         brief: "The MCP primitive to structure markdown content as",
-        default: "resource",
+        default: "tool",
         values: ["tool", "resource"],
       },
       port: {
