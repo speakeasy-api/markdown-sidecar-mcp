@@ -20,7 +20,7 @@ interface StartCommandFlags {
   readonly package: string;
   readonly registry: "npm" | "gomodules";
   readonly subDir?: string | undefined;
-  readonly mcpPrimitive: "tool" | "resource" | "gomodules";
+  readonly mcpPrimitive: "tool" | "resource";
 }
 
 export async function main(this: LocalContext, flags: StartCommandFlags) {
