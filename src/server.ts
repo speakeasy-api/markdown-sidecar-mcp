@@ -17,7 +17,7 @@ export async function createMCPServer(deps: {
 }) {
   const server = new McpServer({
     name: "Supporting Markdown Docs",
-    version: "0.0.1",
+    version: "1.0.0",
   });
 
   switch (deps.registry) {
