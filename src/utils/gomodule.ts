@@ -23,10 +23,10 @@ export async function mountGoDocs(
   workingDir: string,
   logger: ConsoleLogger,
   mcpPrimitive: "tool" | "resource",
-  subDir?: string,
+  docsSubDir?: string,
 ) {
   const modulePath = resolveGoModulePath(moduleName, workingDir);
-  const docsDir = subDir ? path.join(modulePath, subDir) : modulePath;
+  const docsDir = docsSubDir ? path.join(modulePath, docsSubDir) : modulePath;
 
   try {
     await fs.access(docsDir);

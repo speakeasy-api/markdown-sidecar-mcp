@@ -19,6 +19,13 @@ export const startCommand = buildCommand({
         default: "stdio",
         values: ["stdio", "sse"],
       },
+      workingDir: {
+        kind: "parsed",
+        brief: "The working directory to run the docs server from",
+        parse: (val: string) => {
+          return z.string().nonempty().parse(val);
+        },
+      },
       packageName: {
         kind: "parsed",
         brief: "The package to mount markdown docs for",
@@ -30,14 +37,7 @@ export const startCommand = buildCommand({
         default: "npm",
         values: ["npm", "gomodules", "pypi"],
       },
-      workingDir: {
-        kind: "parsed",
-        brief: "The working directory to run the docs server from",
-        parse: (val: string) => {
-          return z.string().nonempty().parse(val);
-        },
-      },
-      subDir: {
+      docsSubDir: {
         kind: "parsed",
         brief: "The optional subdirectory of the package to mount markdown docs for",
         optional: true,

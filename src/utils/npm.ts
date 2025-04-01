@@ -1,11 +1,23 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ConsoleLogger } from "../console-logger.js";
-
+import { spawnSync } from "child_process";
 import path from 'path';
 import fs from 'fs/promises';
 import { findMarkdownFiles, toToolNameFormat } from "./util.js";
 
-async function findPackageFromDir(startDir: string, packageName: string): Promise<string> {
+function getGitRoot(): string {
+  try {
+    const result = spawnSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf-8' });
+    if (result.status === 0) {
+      return result.stdout.trim();
+    }
+  } catch {
+    // If git command fails, fall back to process.cwd()
+  }
+  return process.cwd();
+}
+
+async function findPackageFromDir(startDir: string = getGitRoot(), packageName: string): Promise<string> {
   const packagePath = path.join(startDir, "node_modules", packageName);
   try {
     await fs.access(packagePath);
@@ -18,13 +30,13 @@ async function findPackageFromDir(startDir: string, packageName: string): Promis
 export async function mountNpmDocs(
   server: McpServer,
   packageName: string,
-  workingDir: string,
+  workingDir: string = getGitRoot(),
   logger: ConsoleLogger,
   mcpPrimitive: "tool" | "resource",
-  subDir?: string,
+  docsSubDir?: string,
 ) {
   const pkgPath = await findPackageFromDir(workingDir, packageName);
-  const docsDir = subDir ? path.join(pkgPath, subDir) : pkgPath;
+  const docsDir = docsSubDir ? path.join(pkgPath, docsSubDir) : pkgPath;
 
   // Ensure the docs directory exists
   try {

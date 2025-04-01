@@ -1,5 +1,5 @@
 {
-  "name": "mcp-markdown-sidecar",
+  "name": "markdown-sidecar-mcp",
   "version": "1.0.0",
   "author": "speakeasyapi",
   "type": "module",
@@ -8,12 +8,12 @@
   },
   "tshy": {
     "sourceDialects": [
-      "mcp-markdown-sidecar/source"
+      "markdown-sidecar-mcp/source"
     ],
     "exports": {
       ".": {
         "import": {
-          "mcp-markdown-sidecar/source": "./src/index.ts",
+          "markdown-sidecar-mcp/source": "./src/index.ts",
           "types": "./dist/esm/index.d.ts",
           "default": "./dist/esm/index.js"
         },
@@ -25,7 +25,7 @@
       "./package.json": "./package.json",
       "./*.js": {
         "import": {
-          "mcp-markdown-sidecar/source": "./src/*.ts",
+          "markdown-sidecar-mcp/source": "./src/*.ts",
           "types": "./dist/esm/*.d.ts",
           "default": "./dist/esm/*.js"
         },
@@ -36,7 +36,7 @@
       },
       "./*": {
         "import": {
-          "mcp-markdown-sidecar/source": "./src/*.ts",
+          "markdown-sidecar-mcp/source": "./src/*.ts",
           "types": "./dist/esm/*.d.ts",
           "default": "./dist/esm/*.js"
         },

@@ -20,7 +20,7 @@ interface StartCommandFlags {
   readonly packageName: string;
   readonly workingDir: string;
   readonly registry: "npm" | "gomodules" | "pypi";
-  readonly subDir?: string | undefined;
+  readonly docsSubDir?: string | undefined;
   readonly mcpPrimitive: "tool" | "resource";
 }
 
@@ -49,7 +49,7 @@ async function startStdio(flags: StartCommandFlags) {
     workingDir: flags.workingDir,
     registry: flags.registry,
     logger,
-    subDir: flags.subDir,
+    docsSubDir: flags.docsSubDir,
     mcpPrimitive: flags.mcpPrimitive,
   });
   await server.connect(transport);
@@ -70,7 +70,7 @@ async function startSSE(flags: StartCommandFlags) {
     workingDir: flags.workingDir,
     registry: flags.registry,
     logger,
-    subDir: flags.subDir,
+    docsSubDir: flags.docsSubDir,
     mcpPrimitive: flags.mcpPrimitive,
   });
   let transport: SSEServerTransport | undefined;

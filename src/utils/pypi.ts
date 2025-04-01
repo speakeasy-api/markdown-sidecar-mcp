@@ -1,5 +1,6 @@
 import { spawnSync } from "child_process";
 import path from "path";
+import fs from 'fs/promises';
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ConsoleLogger } from "../console-logger.js";
 import { findMarkdownFiles, toToolNameFormat } from "./util.js";
@@ -61,6 +62,7 @@ export async function mountPyPiDocs(
   workingDirectory: string,
   logger: ConsoleLogger,
   mcpPrimitive: "tool" | "resource",
+  docsSubDir?: string,
 ) {
   const helpText = getPythonHelp(packageName, workingDirectory);
   
@@ -98,7 +100,15 @@ export async function mountPyPiDocs(
 
   // Find and mount markdown files if available
   const pkgPath = getPythonPackagePath(packageName, workingDirectory);
-  const markdownFiles = await findMarkdownFiles(pkgPath, []);
+  const docsDir = docsSubDir ? path.join(pkgPath, docsSubDir) : pkgPath;
+
+  try {
+    await fs.access(docsDir);
+  } catch {
+    throw new Error(`No docs found for Python package ${packageName}`);
+  }
+  
+  const markdownFiles = await findMarkdownFiles(docsDir, []);
 
   if (markdownFiles.length === 0) {
     logger.debug(`No markdown files found for ${packageName}`);
