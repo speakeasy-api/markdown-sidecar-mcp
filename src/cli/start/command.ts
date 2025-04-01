@@ -28,7 +28,7 @@ export const startCommand = buildCommand({
         kind: "enum",
         brief: "The registry the package belongs to",
         default: "npm",
-        values: ["npm", "gomodules"],
+        values: ["npm", "gomodules", "pypi"],
       },
       subDir: {
         kind: "parsed",

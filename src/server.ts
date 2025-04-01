@@ -6,6 +6,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ConsoleLogger } from "./console-logger.js";
 import { mountNpmDocs } from "./utils/npm.js";
 import { mountGoDocs } from "./utils/gomodule.js";
+import { mountPyPiDocs } from "./utils/pypi.js";
 
 export async function createMCPServer(deps: {
   package: string;
@@ -25,6 +26,9 @@ export async function createMCPServer(deps: {
       break;
     case "gomodules":
       await mountGoDocs(server, deps.package, deps.logger, deps.mcpPrimitive, deps.subDir);
+      break;
+    case "pypi":
+      await mountPyPiDocs(server, deps.package, deps.logger, deps.mcpPrimitive);
       break;
     default:
       throw new Error(`Unsupported registry: ${deps.registry}`);

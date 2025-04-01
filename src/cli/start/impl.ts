@@ -18,7 +18,7 @@ interface StartCommandFlags {
   readonly "log-level": ConsoleLoggerLevel;
   readonly env?: [string, string][];
   readonly package: string;
-  readonly registry: "npm" | "gomodules";
+  readonly registry: "npm" | "gomodules" | "pypi";
   readonly subDir?: string | undefined;
   readonly mcpPrimitive: "tool" | "resource";
 }
