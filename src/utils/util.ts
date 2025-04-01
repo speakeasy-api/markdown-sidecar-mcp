@@ -1,36 +1,53 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
-export async function findModuleRoot(startPath: string): Promise<string> {
-  let dir = startPath;
-  if (dir.includes("dist") || dir.includes("build") || dir.includes("bin")) {
-    while (dir !== "/") {
-        const subDir = path.dirname(dir);
-        if (path.basename(subDir) === "node_modules") {
-          return dir;
-        }
-    
-        dir = subDir;
-      }
-  }
-  return dir;
+export interface MarkdownFileInfo {
+  path: string;
+  content: string;
+  title: string;
 }
-  
 
-export async function findMarkdownFiles(dir: string): Promise<string[]> {
+export async function findMarkdownFiles(
+  dir: string, 
+  excludedDirs: string[],
+): Promise<MarkdownFileInfo[]> {
     const entries = await fs.readdir(dir, { withFileTypes: true });
-    let files: string[] = [];
+    let files: MarkdownFileInfo[] = [];
 
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
       if (entry.isDirectory()) {
-        const excludedDirs = ["node_modules", "dist", "build", "bin"];
         if (excludedDirs.includes(path.basename(fullPath))) {
             continue;
         }
-        files = files.concat(await findMarkdownFiles(fullPath));
+        files = files.concat(await findMarkdownFiles(fullPath, excludedDirs));
       } else if (entry.isFile() && entry.name.endsWith(".md")) {
-        files.push(fullPath);
+        const content = await fs.readFile(fullPath, "utf-8");
+        if (!content) continue;
+
+        // Check if file only contains headers
+        const lines = content.split("\n");
+        const hasNonHeaderContent = lines.some(line => line.trim() && !line.startsWith("#"));
+        if (!hasNonHeaderContent) continue;
+
+        // Initially set the title to the first line of the markdown content
+        let title = lines[0]?.trim() || "";
+        
+        // Look for the first markdown header
+        for (const line of lines) {
+          if (line.startsWith("#")) {
+            title = line.slice(2).trim();
+            break;
+          }
+        }
+
+        if (!title) continue;
+
+        files.push({
+          path: fullPath,
+          content,
+          title
+        });
       }
     }
     return files;

@@ -6,7 +6,6 @@ import { ConsoleLogger } from "../console-logger.js";
 import { findMarkdownFiles, toToolNameFormat } from "./util.js";
 
 function resolveGoModulePath(moduleName: string): string {
-
   const result = spawnSync(
     "go",
     ["list", "-m", "-f", "{{.Dir}}", moduleName],
@@ -34,56 +33,37 @@ export async function mountGoDocs(
     throw new Error(`No docs found for Go module ${moduleName}`);
   }
 
-  const markdownFiles = await findMarkdownFiles(docsDir);
+  const markdownFiles = await findMarkdownFiles(docsDir, []);
 
   if (markdownFiles.length === 0) {
     throw new Error(`No markdown files found for ${moduleName}`);
   }
 
   for (const file of markdownFiles) {
-    const content = await fs.readFile(file, "utf-8");
-    const relativePath = path.relative(modulePath, file).replace(/\.md$/, '');
-
-    if (!content) {
-      logger.debug(`No content found for ${relativePath}`);
-      continue;
-    }
-
-    let title = content.split("\n")[0]?.trim() || "";
-    for (const line of content.split("\n")) {
-      if (line.startsWith("#")) {
-        title = line.slice(2).trim();
-        break;
-      }
-    }
-
-    if (!title) {
-      logger.debug(`No title found for ${relativePath}`);
-      continue;
-    }
+    const relativePath = path.relative(modulePath, file.path).replace(/\.md$/, '');
 
     if (mcpPrimitive === "tool") {
       server.tool(
         toToolNameFormat(`docs-${moduleName}-${relativePath}`),
-        title.trim(),
+        file.title.trim(),
         () => ({
           content: [
             {
               type: "text",
-              text: content,
+              text: file.content,
             },
           ],
         }),
       );
     } else {
       server.resource(
-        `${moduleName} - ${title.trim()}`,
+        `${moduleName} - ${file.title.trim()}`,
         `docs://pkg.go.dev/${moduleName}/${relativePath}`,
         async (uri) => ({
           contents: [
             {
               uri: uri.toString(),
-              text: content,
+              text: file.content,
               mimeType: "text/markdown",
             },
           ],

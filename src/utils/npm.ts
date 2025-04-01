@@ -3,7 +3,7 @@ import { ConsoleLogger } from "../console-logger.js";
 
 import path from 'path';
 import fs from 'fs/promises';
-import { findMarkdownFiles, findModuleRoot, toToolNameFormat } from "./util.js";
+import { findMarkdownFiles, toToolNameFormat } from "./util.js";
 
 let requireResolve: NodeJS.RequireResolve | ((arg0: string) => string);
 try {
@@ -22,7 +22,7 @@ export async function mountNpmDocs(
   subDir?: string,
 ) {
   let pkgPath = path.dirname(requireResolve(packageName));
-  pkgPath = await findModuleRoot(pkgPath);
+  pkgPath = await findNPMModuleRoot(pkgPath);
   const docsDir = subDir ? path.join(pkgPath, subDir) : pkgPath;
 
   // Ensure the docs directory exists
@@ -31,61 +31,39 @@ export async function mountNpmDocs(
   } catch {
     throw new Error(`No docs found for ${packageName}`);
   }
-  const markdownFiles = await findMarkdownFiles(docsDir);
+
+  const markdownFiles = await findMarkdownFiles(docsDir, ["node_modules", "dist", "build", "bin"]);
   
   if (markdownFiles.length === 0) {
     throw new Error(`No markdown files found for ${packageName}`);
   }
 
   for (const file of markdownFiles) {
-    const content = await fs.readFile(file, "utf-8");
-    const relativePath = path.relative(pkgPath, file).replace(/\.md$/, '');
+    const relativePath = path.relative(pkgPath, file.path).replace(/\.md$/, '');
     
-    if (!content) {
-      logger.debug(`No content found for ${relativePath}`);
-      continue;
-    }
-
-    // Initially set the title to the first line of the markdown content
-    let title = content.split("\n")[0]?.trim() || "";
-    
-    for (const line of content.split("\n")) {
-      // Check if the line starts with a markdown header (i.e., "#", "##", "###", etc.)
-      if (line.startsWith("#")) {
-        title = line.slice(2).trim();
-        // Break the loop as we have found the first markdown header
-        break;
-      }
-    }
-
-    if (!title) {
-      logger.debug(`No title found for ${relativePath}`);
-      continue;
-    }
-
     if (mcpPrimitive === "tool") {
       server.tool(toToolNameFormat(`docs-${packageName}-${relativePath}`), 
-        title.trim(),
+        file.title.trim(),
         () => { 
           return {
             content: [
               {
                 type: "text",
-                text: content,
+                text: file.content,
               },
             ],
           }; 
         });
     } else {
       server.resource(
-        `${packageName.toUpperCase()} - ${title.trim()}`,
+        `${packageName.toUpperCase()} - ${file.title.trim()}`,
         `docs://npmjs.com/package/${packageName}/${relativePath}/README.md`,
         async (uri) => {
           return {
             contents: [
               {
                 uri: uri.toString(),
-                text: content,
+                text: file.content,
                 mimeType: "text/markdown",
               },
             ],
@@ -97,4 +75,20 @@ export async function mountNpmDocs(
     logger.debug(`Mounted ${relativePath} as markdown resource`);
   }
 }
+
+async function findNPMModuleRoot(startPath: string): Promise<string> {
+  let dir = startPath;
+  if (dir.includes("dist") || dir.includes("build") || dir.includes("bin")) {
+    while (dir !== "/") {
+        const subDir = path.dirname(dir);
+        if (path.basename(subDir) === "node_modules") {
+          return dir;
+        }
+    
+        dir = subDir;
+      }
+  }
+  return dir;
+}
+  
 
