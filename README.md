@@ -19,7 +19,7 @@ This is designed to be executed from within a project directory where the reques
 ## Installation
 
 ```bash
-npx -y mcp-package-docs
+npx -y markdown-sidecar-mcp
 ```
 
 ## Arguments
