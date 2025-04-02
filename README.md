@@ -59,8 +59,8 @@ npm i
 # Build
 npm run build
 
-# Watch mode
-npm run watch
+# Run with Bun
+npm run build:mcp
 ```
 
 ## Contributing
