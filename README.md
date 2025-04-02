@@ -18,7 +18,9 @@ This is designed to be executed from within a project directory where the reques
 
 ## Installation
 
-TODO
+```bash
+npx -y mcp-package-docs
+```
 
 ## Arguments
 
